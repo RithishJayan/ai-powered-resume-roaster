@@ -1,0 +1,79 @@
+# Repo-root `.env` is used automatically for `${VAR}` substitution in this file.
+# Optional `env_file` below also passes those variables into app containers when `.env` exists.
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: resume_roast
+      POSTGRES_PASSWORD: resume_roast
+      POSTGRES_DB: resume_roast
+    ports:
+      # Default 5434 on host if something else uses 5432 locally.
+      - "${POSTGRES_PUBLISH_PORT:-5434}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resume_roast -d resume_roast"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    env_file:
+      - path: .env
+        required: false
+      # Local API keys live here; do not list them under `environment` or empty `${VAR:-}` overrides them.
+      - path: backend/.env
+        required: false
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PUBLISH_PORT:-4000}:4000"
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      DATABASE_URL: postgresql://resume_roast:resume_roast@postgres:5432/resume_roast
+      # Required by NextAuth / roast JWT; override in `.env` for non-demo use.
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-compose-dev-only-change-me-openssl-rand-base64-32}
+      # GROQ_API_KEY, other LLM keys, embeddings, INTERNAL_AUTH_SECRET: repo-root `.env` and/or `backend/.env` via `env_file` above.
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      [
+        "sh",
+        "-c",
+        "cd /app/backend && npm run db:migrate && exec npm run start",
+      ]
+
+  frontend:
+    env_file:
+      - path: .env
+        required: false
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        BACKEND_URL: http://backend:4000
+        NEXTAUTH_URL: http://localhost:${FRONTEND_PUBLISH_PORT:-3009}
+        NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-compose-dev-only-change-me-openssl-rand-base64-32}
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PUBLISH_PORT:-3009}:3009"
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: "3009"
+      NEXTAUTH_URL: http://localhost:${FRONTEND_PUBLISH_PORT:-3009}
+      # Required by NextAuth / roast JWT; override in `.env` for non-demo use.
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-compose-dev-only-change-me-openssl-rand-base64-32}
+      BACKEND_URL: http://backend:4000
+      INTERNAL_AUTH_SECRET: ${INTERNAL_AUTH_SECRET:-}
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

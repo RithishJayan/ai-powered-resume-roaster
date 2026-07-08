@@ -1,0 +1,26 @@
+{
+  "name": "ser594-m2-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf .next",
+    "dev": "dotenv -e ../.env.local -e .env.local -- next dev",
+    "dev:clean": "npm run clean && dotenv -e ../.env.local -e .env.local -- next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.2.0",
+    "next-auth": "^4.24.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.4.4",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  }
+}

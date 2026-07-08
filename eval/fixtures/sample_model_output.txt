@@ -1,0 +1,11 @@
+[Level: Medium]
+
+Your resume leads with impact but buries metrics.
+
+[RESUME_SCORES]
+[{"name":"Clarity","score":7},{"name":"Impact","score":5}]
+[/RESUME_SCORES]
+
+[AI_ASSESSMENT]
+{"score":72,"label":"Solid","signs":["Good structure","Weak metrics"]}
+[/AI_ASSESSMENT]

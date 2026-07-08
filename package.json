@@ -1,0 +1,29 @@
+{
+  "name": "ser594-m2-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n be,fe -c green,blue \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w frontend",
+    "start": "npm run start -w frontend",
+    "test": "npm run test -w backend --",
+    "test:watch": "npm run test:watch -w backend",
+    "db:generate": "npm run db:generate -w backend",
+    "db:migrate": "npm run db:migrate -w backend",
+    "db:push": "npm run db:push -w backend",
+    "rag:ingest": "npm run rag:ingest -w backend",
+    "eval": "node eval/run.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "docx": "^9.5.1",
+    "pdfkit": "^0.17.2"
+  },
+  "overrides": {
+    "caniuse-lite": "1.0.30001792"
+  }
+}
